@@ -1,4 +1,6 @@
 const fs = require('fs');
+const diff = require('diff');
+
 var old_file = fs.readFileSync('./var/file.txt', {encoding:"utf8"});
 
 fs.watch('./var/file.txt', function(eventType, filename) {
