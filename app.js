@@ -1,4 +1,5 @@
 const fs = require('fs');
+var old_file = fs.readFileSync('./var/file.txt', {encoding:"utf8"});
 
 fs.watch('./var/file.txt', function(eventType, filename) {
   fs.readFile(`./var/${filename}`, {encoding:"utf8"}, function(err, data) {
