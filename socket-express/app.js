@@ -28,6 +28,14 @@ socket.on('connection', function(){
   socket.emit('message', 'Successfully connected.');
 });
 
+/* TODO: Figure out why this event is not firing
+socket.on('message received', function(data) {
+  console.log('Client is saying a message was received: ' + data);
+});
+
+console.log('Here is an arbitrary call to console.log');
+*/
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
