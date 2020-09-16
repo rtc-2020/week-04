@@ -2,6 +2,9 @@
 
 const createError = require('http-errors');
 const express = require('express');
+const {EventEmitter} = require('events');
+const fs = require('fs');
+const diff = require('diff');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
@@ -23,9 +26,45 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 
+var old_file = fs.readFileSync('var/file.txt', {encoding:"utf8"});
+var fileEvent = new EventEmitter();
+
+fileEvent.on('changed file', function(data){
+  console.log('The file was changed and fired an event. This data was received:\n' + data);
+});
+
+fs.watch('var/file.txt', function(eventType, filename) {
+  fs.promises.readFile(`var/${filename}`, {encoding:"utf8"})
+    .then(function(data) {
+    // only flash this message if the file's content has changed
+    var new_file = data;
+    if (new_file !== old_file) {
+      console.log(`The content of ${filename} has changed: it was a ${eventType} event.`)
+      var file_changes = diff.diffLines(old_file,new_file);
+      /*
+      console.log(`Here are the changes (promise!):`);
+      */
+      var all_changes = file_changes.map((change, i) => {
+        if (change.added) {
+          return `Added: ${change.value}`;
+        }
+        if (change.removed) {
+          return `Removed: ${change.value}`;
+        }
+      });
+      fileEvent.emit('changed file', all_changes.join('\n'));
+    }
+    old_file = new_file
+  });
+  }
+);
+
 // send a message on successful socket connection
 socket.on('connection', function(){
   socket.emit('message', 'Successfully connected.');
+});
+fileEvent.on('changed file', function(data) {
+  socket.emit('message', data);
 });
 
 /* TODO: Figure out why this event is not firing
