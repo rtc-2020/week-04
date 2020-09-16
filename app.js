@@ -5,8 +5,8 @@ const {EventEmitter} = require('events');
 var old_file = fs.readFileSync('./var/file.txt', {encoding:"utf8"});
 var fileEvent = new EventEmitter();
 
-fileEvent.on('changed file', function(){
-  console.log('The file was changed and fired an event');
+fileEvent.on('changed file', function(data){
+  console.log('The file was changed and fired an event. This data was received:\n' + data);
 });
 
 fs.watch('./var/file.txt', function(eventType, filename) {
@@ -19,16 +19,16 @@ fs.watch('./var/file.txt', function(eventType, filename) {
       var file_changes = diff.diffLines(old_file,new_file);
       /*
       console.log(`Here are the changes (promise!):`);
-      file_changes.forEach((change, i) => {
+      */
+      var all_changes = file_changes.map((change, i) => {
         if (change.added) {
-          console.log(`Added: ${change.value}`);
+          return `Added: ${change.value}`;
         }
         if (change.removed) {
-          console.log(`Removed: ${change.value}`);
+          return `Removed: ${change.value}`;
         }
       });
-      */
-      fileEvent.emit('changed file');
+      fileEvent.emit('changed file', all_changes.join('\n'));
     }
     old_file = new_file
   });
