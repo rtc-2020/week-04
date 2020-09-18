@@ -8,7 +8,7 @@ const diff = require('diff');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const socket = require('socket.io')();
+const io = require('socket.io')();
 
 const indexRouter = require('./routes/index');
 
@@ -60,20 +60,14 @@ fs.watch('var/file.txt', function(eventType, filename) {
 );
 
 // send a message on successful socket connection
-socket.on('connection', function(){
+io.on('connection', function(socket){
   socket.emit('message', 'Successfully connected.');
-});
-fileEvent.on('changed file', function(data) {
-  socket.emit('message', data);
-});
-
-/* TODO: Figure out why this event is not firing
-socket.on('message received', function(data) {
-  console.log('Client is saying a message was received: ' + data);
+  socket.on('message received', function(data) {
+    console.log('Client is saying a message was received: ' + data);
+  });
 });
 
-console.log('Here is an arbitrary call to console.log');
-*/
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -91,4 +85,4 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = {app, socket};
+module.exports = {app, io};
