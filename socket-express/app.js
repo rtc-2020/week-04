@@ -65,6 +65,9 @@ io.on('connection', function(socket){
   socket.on('message received', function(data) {
     console.log('Client is saying a message was received: ' + data);
   });
+  fileEvent.on('changed file', function(data) {
+    socket.emit('diffed changes', data);
+  });
 });
 
 
